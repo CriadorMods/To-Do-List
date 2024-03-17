@@ -104,12 +104,7 @@
         #color-option-9 {
             background-image: linear-gradient(to right, #e74c3c, #f39c12);
         }
-        .custom-color {
-            margin-top: 20px;
-        }
-
-
-        /* Estilos para o botão de seleção de cor personalizada */
+         
         .custom-color input[type="color"] {
             width: 70px;
             height: 70px;
@@ -117,12 +112,12 @@
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             position: relative;
             padding: 0;
             margin: 0;
-            appearance: none;
+            appearance: none;      
         }
 
         .custom-color input[type="color"]::-webkit-color-swatch-wrapper {
@@ -146,6 +141,35 @@
         .custom-color label {
             display: none;
         }
+
+        .custom-gradient-btn {
+            background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-gradient-btn i {
+            font-size: 30px;
+            color: white;
+            line-height: 70px;
+        }
+
+        .custom-gradient-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(37, 37, 37, 0.4);
+        }
+
     </style>
 </head>
 <body>
@@ -179,11 +203,17 @@
             <div class="color-option" id="color-option-9" onclick="changeBackgroundColor('linear-gradient(to right, #e74c3c, #f39c12)')">
                 <i class="fas fa-paint-brush"></i>
             </div>
+            <div class="custom-color">
+                <label for="custom-color-picker">
+                </label>
+                <input type="color" id="custom-color-picker" onchange="changeBackgroundColor(this.value)">
+            
+        </div>
+        <div class="custom-gradient-btn" onclick="createLinearGradient()">
+            <i class="fas fa-paint-brush"></i>
         </div>
     </div>
-    <div class="custom-color">
-        <input type="color" id="custom-color-picker" onchange="changeBackgroundColor(this.value)">      
-    </div>
+    
 </div>
 
 </div>
@@ -196,8 +226,33 @@
             localStorage.setItem('backgroundColor', color);
             window.location.href = 'main.html';
         }
+        
+        function createLinearGradient() {
+    
+    const confirmCreate = confirm("Do you want to create a linear gradient background?");
+    
+    
+    if (confirmCreate) {
+        
+        const gradientDirection = prompt('Enter gradient direction (e.g., to right, to left, etc.):');
+        const startColor = prompt('Enter start color:');
+        const endColor = prompt('Enter end color:');
+        
+        
+        if (gradientDirection && startColor && endColor) {
+            
+            const linearGradient = `linear-gradient(${gradientDirection}, ${startColor}, ${endColor})`;
+            
+            changeBackgroundColor(linearGradient);
+        } else {
+            alert('Please provide all necessary inputs.');
+        }
+    } else {
+        // If the user cancels, do nothing. (just in case)
+        return;
+    }
+}
+
     </script>
 </body>
 </html>
-
-
