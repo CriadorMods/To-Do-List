@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<link href="favicon.ico" rel="icon">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        animation: fadeIn 0.9s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    .container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s;
+    }
+    h1 {
+        text-align: center;
+        color: #4d4c4c;
+    }
+    #taskInput, #dueDateInput {
+        width: calc(100% - 80px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    #dueDateInput {
+        width: calc(100% - 110px);
+    }
+    .task-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        transition: background-color 0.3s;
+        color: #000; /* Adjust text color for tasks */
+        opacity: 0;
+        animation: fadeIn 0.5s forwards; /* Animation for fade-in */
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .task-item:last-child {
+        border-bottom: none;
+    }
+    .task-item input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    .delete-btn {
+        background-color: #ff6b6b;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: background-color 0.3s;
+    }
+    .delete-btn:hover {
+        background-color: #e74c3c;
+    }
+    .dark-mode-toggle {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: #757474;
+        outline: none;
+    }
+    .dark-mode-toggle:hover {
+        color: #555;
+    }
+    .dark {
+        background-color: #292828;
+        color: #fff;
+    }
+    .search-filter-container {
+        margin-bottom: 20px;
+    }
+    .search-filter-container input[type="text"],
+    .search-filter-container select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+        color: #000; /* Adjust text color for better visibility */
+    }
+    #addTaskBtn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #addTaskBtn:hover {
+        background-color: #0056b3;
+    }
+    .updates-container {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        color: #000; /* Adjust text color for updates */
+    }
+    .updates-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .update-item {
+        margin-bottom: 5px;
+    }
+    .bug-item {
+        color: red;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>To-Do List</h1>
+    <div class="search-filter-container">
+        <input type="text" id="searchInput" placeholder="Search tasks...">
+        <select id="filterSelect">
+            <option value="">Filter by:</option>
+            <option value="category">Category</option>
+            <option value="priority">Priority</option>
+            <option value="dueDate">Due Date</option>
+        </select>
+    </div>
+    <input type="text" id="taskInput" placeholder="Add new task">
+    <input type="date" id="dueDateInput">
+    <button id="addTaskBtn">Add Task</button>
+    <div id="taskList"></div>
+    <div class="updates-container">
+        <div class="updates-title">Updates/Bugs:</div>
+        <div class="update-item">Added due date functionality to tasks.</div>
+        <div class="update-item">Added a new background system.</div>
+        <div class="update-item bug-item">Fixed issue with delete button not working.</div>
+        <!-- Add more updates/bugs here -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        const taskList = document.getElementById('taskList');
+        const taskInput = document.getElementById('taskInput');
+        const dueDateInput = document.getElementById('dueDateInput');
+        const searchInput = document.getElementById('searchInput');
+        const filterSelect = document.getElementById('filterSelect');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach(function(task, index) {
+                const taskItem = document.createElement('div');
+                taskItem.classList.add('task-item');
+                taskItem.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})">
+                    <span>${task.text}</span>
+                    <span>Due: ${task.dueDate}</span>
+                    <button class="delete-btn">Delete</button>
+                `;
+                taskList.appendChild(taskItem);
+                
+                const deleteBtn = taskItem.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', function() {
+                    deleteTask(index);
+                });
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        renderTasks();
+
+        function addTask() {
+            const text = taskInput.value.trim();
+            const dueDate = dueDateInput.value;
+            if (text !== '') {
+                const newTask = {
+                    text: text,
+                    completed: false,
+                    dueDate: dueDate
+                };
+                tasks.push(newTask);
+                taskInput.value = '';
+                dueDateInput.value = '';
+                renderTasks();
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+        
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            renderTasks();
+        }
+
+        function searchTasks() {
+            const searchText = searchInput.value.toLowerCase();
+            const filteredTasks = tasks.filter(task => task.text.toLowerCase().includes(searchText));
+            renderFilteredTasks(filteredTasks);
+        }
+
+        function filterTasksByCategory() {
+           
+        }
+
+        function filterTasksByPriority() {
+            
+        }
+
+        function filterTasksByDueDate() {
+            
+        }
+
+        function renderFilteredTasks(filteredTasks) {
+            taskList.innerHTML = '';
+            filteredTasks.forEach(function(task, index) {
+                const taskItem = document.createElement('div');
+                taskItem.classList.add('task-item');
+                taskItem.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})">
+                    <span>${task.text}</span>
+                    <span>Due: ${task.dueDate}</span>
+                    <button class="delete-btn">Delete</button>
+                `;
+                taskList.appendChild(taskItem);
+                
+                const deleteBtn = taskItem.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', function() {
+                    deleteTask(index);
+                });
+            });
+        }
+
+        searchInput.addEventListener('input', searchTasks);
+        filterSelect.addEventListener('change', function() {
+            const filterOption = this.value;
+            switch (filterOption) {
+                case 'category':
+                    filterTasksByCategory();
+                    break;
+                case 'priority':
+                    filterTasksByPriority();
+                    break;
+                case 'dueDate':
+                    filterTasksByDueDate();
+                    break;
+                default:
+                    renderTasks();
+            }
+        });
+
+        addTaskBtn.addEventListener('click', addTask);
+    });
+
+   
+    const storedColor = localStorage.getItem('backgroundColor');
+
+if (storedColor) {
+    if (storedColor.startsWith('linear-gradient')) {
+        document.body.style.background = storedColor;
+    } else {
+        document.body.style.backgroundColor = storedColor;
+    }
+}
+
+</script>
+</body>
+</html>
+
+
+
+
